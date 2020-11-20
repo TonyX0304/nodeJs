@@ -2,6 +2,8 @@ let express = require('express')
 // let path = require('path')
 let cookieParser = require('cookie-parser')
 let file = require('./models/file')
+let MongoClient = require('mongodb').MongoClient;
+let url = "mongodb://localhost:27017";
 let app = express()
 
 app.use(express.static(__dirname + '/public'))
@@ -19,6 +21,36 @@ app.all("*",function(req,res,next){
     res.send(200);  //让options尝试请求快速结束
   else
     next();
+})
+
+app.get(/students\S*/, function(req, res){
+  let name = req.query.name || ''
+  MongoClient.connect(url, { useNewUrlParser: true }, function (err, db) {
+    if (err) throw err
+    var dbo = db.db("xt")
+    var whereStr = {'name': name}  // 查询条件
+    console.log(whereStr)
+    dbo.collection("students"). find(whereStr).toArray(function(err, result) { // 返回集合中所有数据
+      if (err) throw err
+      res.json(new Result({data: result}))
+      db.close()
+    })
+  })
+})
+
+app.get(/mongo\S*/, function(req, res){
+  let remoteAddressId = req.query.id || ''
+  MongoClient.connect(url, { useNewUrlParser: true }, function (err, db) {
+    if (err) throw err
+    var dbo = db.db("xt")
+    var whereStr = {'records.remoteAddressId': remoteAddressId}  // 查询条件
+    console.log(whereStr)
+    dbo.collection("testData"). find(whereStr).toArray(function(err, result) { // 返回集合中所有数据
+      if (err) throw err
+      res.json(new Result({data: result}))
+      db.close()
+    })
+  })
 })
 
 // app.get(/api\S*/, function(req, res){
