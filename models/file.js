@@ -18,7 +18,7 @@ module.exports.getAllFolder = function(req, res) {
           name: _res[i],
           type: stats.isDirectory() ? 'directory' : 'file'
         })
-        console.log(arr)
+        // console.log(arr)
         iterator(i+1)
       })
     }
