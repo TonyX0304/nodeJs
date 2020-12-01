@@ -6,7 +6,10 @@ let cookieParser = require('cookie-parser')
 let file = require('./models/file')
 let db = require('./models/db')
 let app = express()
-let url = "mongodb://localhost:27017";
+let url = "mongodb://localhost:27017"
+// 解决跨域
+const cors = require('cors')
+app.use(cors())
 
 // app.use(express.static(__dirname + '/public'))
 app.use(cookieParser())
@@ -30,19 +33,20 @@ app.use(express.urlencoded({ extended: true })) // for parsing application/x-www
 //  console.log(`server running @${app.get('port')}`);
 // })
 // //设置跨域访问
-app.all("*",function(req,res,next){
-  console.log(req.path)
-  //设置允许跨域的域名，*代表允许任意域名跨域
-  res.header("Access-Control-Allow-Origin","*");
-  //允许的header类型
-  res.header("Access-Control-Allow-Headers","content-type");
-  //跨域允许的请求方式 
-  res.header("Access-Control-Allow-Methods","DELETE,PUT,POST,GET,OPTIONS");
-  if (req.method.toLowerCase() == 'options')
-    res.send(200);  //让options尝试请求快速结束
-  else
-    next();
-})
+// app.all("*",function(req,res,next){
+//   console.log(req.path)
+//   console.log(req.method)
+//   //设置允许跨域的域名，*代表允许任意域名跨域
+//   res.header("Access-Control-Allow-Origin","*");
+//   //允许的header类型
+//   res.header("Access-Control-Allow-Headers","content-type");
+//   //跨域允许的请求方式 
+//   res.header("Access-Control-Allow-Methods","DELETE,PUT,POST,GET,OPTIONS");
+//   if (req.method.toLowerCase() == 'options')
+//     res.send(200);  //让options尝试请求快速结束
+//   else
+//     next();
+// })
 
 app.get('/find', function(req, res){
   db.find('students', {}, function(err, result) {
@@ -80,21 +84,6 @@ app.post('/delete', function(req, res){
       return
     }
     res.json(new Result())
-  })
-})
-
-app.get(/students\S*/, function(req, res){
-  let name = req.query.name || ''
-  MongoClient.connect(url, { useNewUrlParser: true }, function (err, db) {
-    if (err) throw err
-    var dbo = db.db("xt")
-    var whereStr = name && {'name': name}  // 查询条件
-    console.log(whereStr)
-    dbo.collection("students"). find(whereStr).toArray(function(err, result) { // 返回集合中所有数据
-      if (err) throw err
-      res.json(new Result({data: result}))
-      db.close()
-    })
   })
 })
 
